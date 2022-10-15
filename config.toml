@@ -3,7 +3,7 @@ languageCode = "en-gb"
 title = "Ivan Babanin"
 theme="archie"
 copyright = "© Ivan Babanin"
-publishDir= "C:\\projects\\github\\babanin.github.io"
+publishDir= "public"
 
 [markup]
   [markup.highlight]
