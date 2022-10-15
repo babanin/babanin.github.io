@@ -1,7 +1,7 @@
 ---
 title: "Experimental post for debugging styles"
 date: 2020-11-20T17:19:07+03:00
-tags: [git, code style]
+tags: [experimental]
 description: 'This is a description for experimental post   '
 ---
 
