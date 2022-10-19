@@ -9,6 +9,10 @@ description: 'Collection of courses, videos, books related to system design inte
 
 * [Grokking the System Design Interview](https://www.educative.io/courses/grokking-the-system-design-interview)
 
+## Theory
+
+* [Distributed Systems course](https://www.youtube.com/playlist?list=PLOE1GTZ5ouRPbpTnrZ3Wqjamfwn_Q5Y9A) by Chris Colohan
+
 ## Books
 
 * [Designing Data-Intensive Applications](https://www.amazon.com/Designing-Data-Intensive-Applications-Reliable-Maintainable/dp/1449373321) by Martin Kleppmann
@@ -17,8 +21,10 @@ description: 'Collection of courses, videos, books related to system design inte
 * [System Design Interview – An insider's guide](https://www.amazon.com/System-Design-Interview-insiders-Second/dp/B08CMF2CQF) by Alex Xu
 * [System Design Interview – An Insider's Guide: Volume 2](https://www.amazon.com/System-Design-Interview-Insiders-Guide/dp/1736049119) by Alex Xu
 
-
 ## Videos
+
+**ByteByteGo**
+* [Design A Location Based Service (Yelp, Google Places)](https://www.youtube.com/watch?v=M4lR_Va97cQ)
 
 **Tushar Roy**
 * [Design a service like TinyUrl](https://www.youtube.com/watch?v=fMZMm_0ZhK4)
@@ -65,3 +71,10 @@ description: 'Collection of courses, videos, books related to system design inte
 ## Twitter accounts
 * [Alex Xu](https://twitter.com/alexxubyte) - author of book series: ‘System Design Interview’
 * [Vadym Kazulkin](https://twitter.com/VKazulkin) - shares links on interesting articles related to large-scale system architecture
+* [Franco Fernando](https://twitter.com/Franc0Fernand0) - quite often writes about distributed systems
+* [Marc Brooker](https://twitter.com/MarcJBrooker) - 
+
+## Articles
+**ID**
+* [Distributed ID Generator](https://towardsdatascience.com/ace-the-system-design-interview-distributed-id-generator-c65c6b568027)
+* [Snowflake ID](https://www.wikiwand.com/en/Snowflake_ID) and [Announcing Snowflake](https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake)

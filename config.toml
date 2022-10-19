@@ -5,6 +5,8 @@ theme="archie"
 copyright = "© Ivan Babanin"
 publishDir= "public"
 
+enableGitInfo = true
+
 [markup]
   [markup.highlight]
     anchorLineNos = false
@@ -44,8 +46,8 @@ name = "/tags"
 url = "/tags"
 weight = 3
 
-[[menu.main]]
-name = "/about"
-url = "/about"
-weight = 4
+#[[menu.main]]
+#name = "/about"
+#url = "/about"
+#weight = 4
 
