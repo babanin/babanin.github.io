@@ -32,6 +32,9 @@ description: 'Collection of courses, videos, books related to system design inte
 * [Design Autocomplete or Typeahead Suggestions for Google search](https://www.youtube.com/watch?v=us0qySiUsGU)
 * [Distributed Database System Key Value Store](https://www.youtube.com/watch?v=rnZmdmlR-2M)
 
+**{ArchDays}** // Russian language
+* [Как подготовиться и пройти System Design Interview. Александр Поломодов](https://www.youtube.com/watch?v=jUbOm0B-eKQ)
+
 ## Mock interviews
 
 **interviewing.io**
@@ -59,6 +62,9 @@ description: 'Collection of courses, videos, books related to system design inte
 **{между скобок}** // Russian language
 * [Design chat application (like Discord)](https://www.youtube.com/watch?v=f_CtX-KBPOU)
 * [Design URL shortener](https://www.youtube.com/watch?v=78i0nPnV-cs)
+
+**{ArchDays}** // Russian language
+* [Интервью по System Design. Александр Поломодов (Тинькофф)](https://www.youtube.com/watch?v=Wh5Ya6UFG1k)
 
 **Подлодка** // Russian language
 * [Design Google Docs](https://www.youtube.com/watch?v=CPa8T78uT_A)
