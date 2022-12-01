@@ -8,6 +8,7 @@ description: 'Collection of courses, videos, books related to system design inte
 ## Courses
 
 * [Grokking the System Design Interview](https://www.educative.io/courses/grokking-the-system-design-interview)
+* [System Design for Interviews and Beyond](https://systemdesignthinking.thinkific.com/courses/system-design-for-interviews-and-beyond) by Mikhail Smarshchok (videos on his [YouTube](https://www.youtube.com/c/SystemDesignInterview) channel are quite popular among system design community)
 
 ## Theory
 
@@ -20,6 +21,10 @@ description: 'Collection of courses, videos, books related to system design inte
 * [Database Internals](https://www.amazon.com/Database-Internals-Deep-Distributed-Systems/dp/1492040347) by Alex Petrov
 * [System Design Interview – An insider's guide](https://www.amazon.com/System-Design-Interview-insiders-Second/dp/B08CMF2CQF) by Alex Xu
 * [System Design Interview – An Insider's Guide: Volume 2](https://www.amazon.com/System-Design-Interview-Insiders-Guide/dp/1736049119) by Alex Xu
+* [Software Requirements, 3rd Edition](https://www.microsoftpressstore.com/store/software-requirements-9780735679665)
+  by Karl Wiegers, Joy Beatty
+* [Software Architecture for Busy Developers: Talk and Act Like a Software Architect in One Weekend](https://www.amazon.com/Software-Architecture-Busy-Developers-architect/dp/1801071594) - by Stephane Eyskens
+* [Kubernetes Patterns: Reusable elements for designing cloud-native applications](https://www.redhat.com/en/engage/kubernetes-containers-architecture-s-201910240918) **free** book by Bilgin Ibryam and Roland Huß
 
 ## Videos
 
@@ -64,7 +69,7 @@ description: 'Collection of courses, videos, books related to system design inte
 * [Design URL shortener](https://www.youtube.com/watch?v=78i0nPnV-cs)
 
 **{ArchDays}** // Russian language
-* [Интервью по System Design. Александр Поломодов (Тинькофф)](https://www.youtube.com/watch?v=Wh5Ya6UFG1k)
+* [Book a hotel room](https://www.youtube.com/watch?v=Wh5Ya6UFG1k) - conducted by Александр Поломодов (Тинькофф)
 
 **Подлодка** // Russian language
 * [Design Google Docs](https://www.youtube.com/watch?v=CPa8T78uT_A)
