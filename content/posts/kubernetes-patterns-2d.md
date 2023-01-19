@@ -8,9 +8,11 @@ description: 'Collection of courses, videos, books related to system design inte
 
 I am reading Early Preview in the begging of Jan 2023.
 
-### Chapter 1
+## 1. Predictable demands
 
-### Chapter 2
+...
+
+## 2. Declarative deployment
 Kubernetes supports:
 * Rolling deployment (aka `RollingUpdate`) - ensure no downtime by replacing one-by-one old containers with new versions
 * Fixed deployment (aka `Recreate`) - stop old containers, launch new ones, wait. The biggest issue is downtime, while new version is creating.
@@ -22,4 +24,21 @@ K8S doesn't support out of the box complex deployment strategies, like canary or
 
 All these projects are part of CNCF.
 
-### Chapter 3
+## 3. Health Probe
+Bug-free code is hard, especially in distributed systems, that's why in most cases it's better to concentrate on recovery.
+
+Kubernetes supports:
+* **Process health check** - if container process is not running, the container restarted. It is ideal, if application can detect failure and shutdown itself.
+* **Liveness probe** - restarts container if probe failed. Probe considered successful if:
+  * HTTP call - any response with status code 200-399
+  * TCP call - open TCP connection
+  * Exec - executes command and expects 0 exit code
+  * [gRPC](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-grpc-liveness-probe) - enable `GRPCContainerProbe` feature gate and implement [gRPC health checking protocol](https://github.com/grpc/grpc/blob/master/doc/health-checking.md)
+* **Readiness probe** - removes container from service if probe failed. POD is ready, when all containers are ready.
+  * **[Readiness gates](https://martinheinz.dev/blog/63)** - requires external service, who will flip readiness flag.
+* **Startup probe** - similar to Liveness probe, however long startup might affect liveness probe - for that purpose a special startup probe was created. Liveness/readiness checks will work right after startup probe success.
+
+## 4. Managed lifecycle
+
+
+## 
