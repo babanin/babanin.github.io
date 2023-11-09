@@ -1,4 +1,5 @@
 ---
+draft: true
 title: "Notes from Kubernetes Patterns (2nd edition)"
 date: 2023-01-15T01:19:07+05:00
 tags: [books, links, k8s, review]
