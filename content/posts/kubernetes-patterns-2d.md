@@ -41,5 +41,22 @@ Kubernetes supports:
 
 ## 4. Managed lifecycle
 
+When POD should be terminated Kubernetes sends **SIGTERM** and after 30 seconds (or `.spec.terminationGracePeriodSeconds`) **SIGKILL**. Both signals might be not enough, that's why Kubernetes supports additional lifecycle hooks: `postStart` and `preDestroy`. For example, following `postStart` waits 30 seconds and when writes to file:
+
+```yaml
+containers:
+  - image: k8spatterns/random-generator:1.0
+    name: random-generator
+    lifecycle:
+      postStart:
+        exec:
+        command:
+          - sh
+          - -c
+          - sleep 30 && echo "Wake up!" > /tmp/postStart_done
+```
+`postStart` runs simultaneously with container initialization (or before container has started!), and it is blocking: container remains in _Waiting_ state and POD in _Pending_ until completion, that's why sometimes `postStart` used as delay for main process. `postStart` might be used as precondition: if hook process returned non-zero result, main process will be killed.
+
+`preStop` has similar syntax and semantics however doesn't prevent POD from deletion.
 
 ## 
