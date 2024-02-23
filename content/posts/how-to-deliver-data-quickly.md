@@ -2,7 +2,7 @@
 title: "How to deliver data quickly"
 date: 2024-02-20T00:29:01+03:00
 tags: [system design, batching]
-description: ''
+description: 'What techniques we can apply to improve performance of data transmission?'
 ---
 
 ## Batching
@@ -12,7 +12,7 @@ The idea of batching is very simple: instead of sending each request or message 
 ![](/how-to-deliver-data-quickly/client-server.png)
 
 There are many benefits:
-* **Batching increases throughput**  - we know that every request consumes resources. Usually it is better to make fewer requests with more data as opposed to make more requests with less data: 
+* **Batching increases throughput**  - we know that every request consumes resources. Usually it is better to make fewer requests with more data as opposed to make more requests with fewer data: 
   * No need to pass HTTP headers with each request
   * No need to establish multiple connections and allocate resources for each of them
   * No need to create multiple threads to process request with assumption that server is using thread-per-request model
@@ -20,7 +20,7 @@ There are many benefits:
 * **Fewer chances of being throttled** - services often protect themselves from being abused by clients that send too many requests in a short period of time.
 
 However, batching introduces complexity on both the client and server side. 
-* On the client side we need to accumulate messages in a buffer before sending out and flush the buffer based on time or size (which one comes first) - all this make the client more harder to implement and configure;
+* On the client side we need to accumulate messages in a buffer before sending out and flush the buffer based on time or size (which one comes first) - all this make the client harder to implement and configure;
 * On the server side, messages in the request are processed one by one and partial failures are possible: first four messages were processed successfully, but on fifth - message handler failed. What should we do? Continue processing? Report failure? Should we rollback already processed messages?
 
 That’s why it's so much easier with a single message per request: request was sent and in the case of failure we definitely know which message was failed and can easily retry an entire request.  
@@ -31,9 +31,11 @@ Looks like we have two options of handling batch request on server:
 
 What format should we use for batch request?
 * **Batch multiple requests into a single call** - combine multiple HTTP requests into one standard HTTP request. Think of it like a concatenation of individual requests. We take multiple HTTP requests with headers & bodies and then concatenate them using separator. The server process each HTTP request and returns single standard HTTP response which contains status codes for each individual request. Many Google APIs support batching, and they use this format, for example Google Drive batch API: https://developers.google.com/drive/api/guides/performance#batch-requests 
+  
   ![](/how-to-deliver-data-quickly/batch-http-request.png)
   ![](/how-to-deliver-data-quickly/batch-http-response.png)
 * **Batch multiple resources into a single call** -  A good example of this approach is AWS SQS batch API which submits multiple messages to specified queue: https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessageBatch.html. In this approach instead of concatenating HTTP requests, we combine multiple messages. A server returns back a standard HTTP response that contains a list of results for each individual message. Each result in the list contains identificator of message and status - whether message was successfully queued or not.
+  
   ![](/how-to-deliver-data-quickly/bulk-http-request.png)
   ![](/how-to-deliver-data-quickly/bulk-http-response.png)
 
@@ -42,9 +44,12 @@ Batch request result in combination of successful and unsuccessful operations. N
 * **Retry each failed operation individually**
 * **Create another batch request containing only failed individual operations**
 
-The last two options require a bigger effort on the part of the client. The client has to check the each individual operation failures and create one or more new requests. However, these two options don’t require server to be idempotent.
+  ![](/how-to-deliver-data-quickly/response-with-partial-failures.png)
+
+The last two options require a bigger effort on the part of the client. The client has to check each individual operation failures and create one or more new requests. However, these two options don’t require server to be idempotent.
 
 Let's take a look on SQS batch API when retrieving messages from SQS we can configure a pull request to return multiple messages up to 10. 
+
 ![](/how-to-deliver-data-quickly/sqs-bulk.png)
 
 Consumer is responsible for deleting processed messages and SQS provides a batch API to do this: delete messages batch API, where a list of message identifiers is specified in a batch request. The response of delete messages batch API contains status of deleting operation for every message. As you know already, fail to delete message will not be removed from the queue and will be retrieved by this or other consumers later when visibility timeout will be expired on such messages. So the consumer has to scan through delete messages batch response and check for individual message deletion failures. If at least one failure is identified, the consumer can use any of these three options mentioned above.
@@ -61,7 +66,7 @@ Compression has many benefits:
 
 We can find compression everywhere:
 * web-server compress HTTP data for faster transfer over the network and browsers then download compressed data and decompress it
-* databases compress data so it takes less disk space to store
+* databases compress data, so it takes less disk space to store
   * LSM-tree based databases (RocksDB, Apache Cassandra etc.) can be configured to compress SS-Tables: on reads database locates compressed chunk on disk and then decompresses it.
 * Messaging systems heavily use compression as well: producers compress messages, send them to the broker, which then transfers compressed data to consumers. Consumers know the compression format and decompress messages. 
 
