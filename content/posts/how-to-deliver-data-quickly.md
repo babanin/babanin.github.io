@@ -5,6 +5,8 @@ tags: [system design, batching]
 description: 'What techniques we can apply to improve performance of data transmission?'
 ---
 
+One of the most effective ways to increase the speed of data delivery is to reduce the amount of data being transferred. Of course, we should always start by reviewing the API endpoint model - is there anything we can omit, or are some fields not being used, etc.? But once that stage is over, the next thing we can do is batching and compression.
+
 ## Batching
 
 The idea of batching is very simple: instead of sending each request or message separately we can group them together into a single request. How does this help?
@@ -34,6 +36,7 @@ What format should we use for batch request?
   
   ![](/how-to-deliver-data-quickly/batch-http-request.png)
   ![](/how-to-deliver-data-quickly/batch-http-response.png)
+
 * **Batch multiple resources into a single call** -  A good example of this approach is AWS SQS batch API which submits multiple messages to specified queue: https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SendMessageBatch.html. In this approach instead of concatenating HTTP requests, we combine multiple messages. A server returns back a standard HTTP response that contains a list of results for each individual message. Each result in the list contains identificator of message and status - whether message was successfully queued or not.
   
   ![](/how-to-deliver-data-quickly/bulk-http-request.png)
@@ -65,10 +68,10 @@ Compression has many benefits:
 * reduce dollar costs when we use public cloud services, since the cost of data transfer for many cloud services is based on the total amount of data served: serving compressed files is less expensive than uncompressed files.
 
 We can find compression everywhere:
-* web-server compress HTTP data for faster transfer over the network and browsers then download compressed data and decompress it
-* databases compress data, so it takes less disk space to store
+* _web-server_ compress HTTP data for faster transfer over the network and browsers then download compressed data and decompress it
+* _databases_ compress data, so it takes less disk space to store
   * LSM-tree based databases (RocksDB, Apache Cassandra etc.) can be configured to compress SS-Tables: on reads database locates compressed chunk on disk and then decompresses it.
-* Messaging systems heavily use compression as well: producers compress messages, send them to the broker, which then transfers compressed data to consumers. Consumers know the compression format and decompress messages. 
+* _messaging systems_ heavily use compression as well: producers compress messages, send them to the broker, which then transfers compressed data to consumers. Consumers know the compression format and decompress messages. 
 
 Here are some more facts about compression:
 * Compression becomes generally more effective as the data size increases. Compression loves batching: rather than compressing individual message or request, it’s more efficient to batch them together and then compress.
