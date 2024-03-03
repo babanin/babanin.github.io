@@ -27,12 +27,16 @@
 	{{- else if (isset .Site.Params "social") -}}
 		<script src="{{ .Site.BaseURL }}js/feather.min.js"></script>
 	{{ end }}
-	{{ if .Site.Params.useCDN | default false -}}
+	{{ if .Site.Params.useCDN | default true -}}
         <!-- <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@1,500&display=swap" rel="stylesheet"> -->
         <!-- <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet"> -->
         <!-- <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet"> -->
-		<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lora" />
-		<link rel="stylesheet" media="screen" href="https://fontlibrary.org//face/butler" type="text/css"/> 
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+	
+	<link rel="stylesheet" href="https://fontlibrary.org/en/face/butler" type="text/css"/> 
 	{{- else -}}
 	{{ $fontstyle := resources.Get "css/fonts.css" | fingerprint }}
         <link href="{{ $fontstyle.Permalink }}" rel="stylesheet">
