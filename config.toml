@@ -54,5 +54,5 @@ weight = 3
 #weight = 4
 
 [services]
-[services.googleAnalytics]
-ID = 'G-DT0NK3W2WJ'
+    [services.googleAnalytics]
+        ID = 'G-DT0NK3W2WJ'
