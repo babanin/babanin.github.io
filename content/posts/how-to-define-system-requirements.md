@@ -37,6 +37,8 @@ Knowledge of this concept not only serve you well during the system design inter
 * define functional requirements and scope of the work
 * define non-functional requirements 
 
+Intrigued? Let's deep dive. 
+
 ### Materials
 
 1. [System Design for Interviews and Beyond](https://systemdesignthinking.thinkific.com/courses/system-design-for-interviews-and-beyond) course by Mikhail Smarshchok
