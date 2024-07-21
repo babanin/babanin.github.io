@@ -24,7 +24,6 @@ style = 'trac'
 tabWidth = 2
 
 [params]
-mode = "off"
 useCDN = true
 subtitle = "Minimal and Clean [blog theme for Hugo](https://github.com/athul/archie)"
 
