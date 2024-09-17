@@ -9,13 +9,13 @@
 
 html {
     color: #232333;
-    font-family: serif;
+    font-family: "Crimson Pro", serif;
     font-size: 19px;
     line-height: 1.6em;
 }
 
 body {
-    font-family: serif;
+    font-family: "Crimson Pro", serif;
     display: block;
     margin: 8px;
 }
@@ -30,7 +30,7 @@ body {
 }
 
 p {
-    font-family: serif;
+    font-family: "Crimson Pro", serif;
     font-size: 20px;
     line-height: 1.5;
 }
@@ -51,7 +51,7 @@ blockquote {
 
 a {
     /* border-bottom: 1px solid var(--maincolor); */
-    font-family: serif;
+    font-family: "Crimson Pro", serif;
     /*text-decoration: none;*/
     /*color: #3700ff*/
 }
@@ -82,8 +82,11 @@ ul li {
 
 /* Images */
 img {
-    border: 3px solid #ececec;
+    border: 0px solid #ececec;
     max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 }
 
 figure {

@@ -1,9 +1,6 @@
 <footer>
 <hr>
-{{- range $index, $key := .Site.Params.Social -}}
-<a class="soc" href="{{ $key.url }}" title="{{ $key.name }}"><i data-feather="{{ $key.icon }}"></i></a>|
-{{- end -}}  
-&nbsp; {{ dateFormat "2006" now }} {{ with .Site.Copyright }} {{ . }} | {{ end }} Built with <a href="https://gohugo.io">Hugo</a>
+2020—{{ dateFormat "2006" now }} {{ with .Site.Copyright }} {{ . }} | {{ end }} Built with <a href="https://gohugo.io">Hugo</a>
 </footer>
 
 {{ if not .Site.IsServer }}
