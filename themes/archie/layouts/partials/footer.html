@@ -1,12 +1,18 @@
 <footer>
 <hr>
-{{- range $index, $key := .Site.Params.Social -}}
-<a class="soc" href="{{ $key.url }}" title="{{ $key.name }}"><i data-feather="{{ $key.icon }}"></i></a>|
-{{- end -}}  
-&nbsp; {{ dateFormat "2006" now }} {{ with .Site.Copyright }} {{ . }} | {{ end }} Built with <a href="https://gohugo.io">Hugo</a>
+2020—{{ dateFormat "2006" now }} {{ with .Site.Copyright }} {{ . }} | {{ end }} Built with <a href="https://gohugo.io">Hugo</a>
 </footer>
+
 {{ if not .Site.IsServer }}
-{{ template "_internal/google_analytics_async.html" . }}
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DT0NK3W2WJ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+    
+        gtag('config', 'G-DT0NK3W2WJ');
+    </script>
 {{ end }}
 
 {{- if (isset .Site.Params "social") -}}

@@ -9,13 +9,13 @@
 
 html {
     color: #232333;
-    font-family: 'Lora', serif;
+    font-family: "Crimson Pro", serif;
     font-size: 19px;
     line-height: 1.6em;
 }
 
 body {
-    font-family: 'Lora', serif;
+    font-family: "Crimson Pro", serif;
     display: block;
     margin: 8px;
 }
@@ -30,7 +30,7 @@ body {
 }
 
 p {
-    font-family: 'Lora', serif;
+    font-family: "Crimson Pro", serif;
     font-size: 20px;
     line-height: 1.5;
 }
@@ -51,9 +51,9 @@ blockquote {
 
 a {
     /* border-bottom: 1px solid var(--maincolor); */
-    font-family: 'Lora', serif;
-    text-decoration: none;
-    color: #9b0000
+    font-family: "Crimson Pro", serif;
+    /*text-decoration: none;*/
+    /*color: #3700ff*/
 }
 
 a:hover {
@@ -82,8 +82,11 @@ ul li {
 
 /* Images */
 img {
-    border: 3px solid #ececec;
+    border: 0px solid #ececec;
     max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 }
 
 figure {
@@ -116,6 +119,7 @@ figure h4::before {
 /* Code blocks */
 code {
     background-color: #f1f1f1;
+    font-family: "Monaco", "Consolas", "Courier", monospace;
     padding: .1em .2em;
 }
 
@@ -161,22 +165,18 @@ header .main {
 }
 
 h1 {
-    font-family: 'ButlerMedium', monospace;
     font-size: 1.5rem;
 }
 
 h2 {
-    font-family: 'ButlerMedium', monospace;
     font-size: 1.4rem;
 }
 
 h3 {
-    font-family: 'ButlerMedium', monospace;
     font-size: 1.1rem;
 }
 
 h4 {
-    font-family: 'ButlerMedium', monospace;
     font-size: 1.05rem;
 }
 
@@ -226,7 +226,7 @@ article .title {
 }
 
 .callout p {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: monospace;
     margin: 0;
 }
 
@@ -274,10 +274,6 @@ svg {
     font-size: 0.85em;
     position: relative;
     -webkit-overflow-scrolling: touch;
-}
-
-code {
-    font-family: "Sans Mono", "Consolas", "Courier", monospace;
 }
 
 .highlight pre code[class*="language-"] {

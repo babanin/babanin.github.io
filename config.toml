@@ -1,32 +1,31 @@
 baseURL = "https://babanin.net"
 languageCode = "en-gb"
 title = "Ivan Babanin"
-theme="archie"
+theme = "archie"
 copyright = "© Ivan Babanin"
-publishDir= "public"
+publishDir = "public"
 
 enableGitInfo = true
 
 staticDir = ['static']
 
 [markup]
-  [markup.highlight]
-    anchorLineNos = false
-    codeFences = true
-    guessSyntax = false
-    hl_Lines = ''
-    lineAnchors = ''
-    lineNoStart = 1
-    lineNos = false
-    lineNumbersInTable = true
-    noClasses = true
-    style = 'trac'
-    tabWidth = 2
+[markup.highlight]
+anchorLineNos = false
+codeFences = true
+guessSyntax = false
+hl_Lines = ''
+lineAnchors = ''
+lineNoStart = 1
+lineNos = false
+lineNumbersInTable = true
+noClasses = true
+style = 'trac'
+tabWidth = 2
 
 [params]
-	mode="off"
-	useCDN=true
-	subtitle = "Minimal and Clean [blog theme for Hugo](https://github.com/athul/archie)"
+useCDN = true
+subtitle = "Minimal and Clean [blog theme for Hugo](https://github.com/athul/archie)"
 
 [[params.social]]
 name = "GitHub"
@@ -53,3 +52,6 @@ weight = 3
 #url = "/about"
 #weight = 4
 
+[services]
+    [services.googleAnalytics]
+        ID = 'G-DT0NK3W2WJ'
