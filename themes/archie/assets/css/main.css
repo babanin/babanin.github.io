@@ -119,6 +119,7 @@ figure h4::before {
 /* Code blocks */
 code {
     background-color: #f1f1f1;
+    font-family: "Monaco", "Consolas", "Courier", monospace;
     padding: .1em .2em;
 }
 
@@ -273,10 +274,6 @@ svg {
     font-size: 0.85em;
     position: relative;
     -webkit-overflow-scrolling: touch;
-}
-
-code {
-    font-family: "Consolas", "Courier", monospace;
 }
 
 .highlight pre code[class*="language-"] {
