@@ -67,12 +67,23 @@ In order to make our messaging system fast, we should consider batching and comp
   we can use TCP instead of HTTP for service communication.
 
 Knowledge of these concepts not only serves you well during the system design interviews, but also in day-to-day work.
-It will help you to:
-
+Defining the scope of the problem and both
 * define functional requirements and scope of the work
 * define non-functional requirements
+is necessary task  when writing a system design document.
+It's common to find design tenets expressed in the form of intended system qualities,
+  such as security, availability, performance and so on.
+  The higher requirement in the list - the more important it is.
+And while considering multiple design options and trade-offs, we use this list as tie breaker.
 
-Intrigued? Let's deep dive.
+When we write a system design document,
+we typically capture functional requirements in the form of the use-cases,
+where each use-case describes one or several behaviours of the system: when the user does this — the system does that.
+
+In general,
+to define functional requirements for the system, we need to identify **who** is going
+to use the system (service/module/feature) and **how**.
+It means that we should start with the customer (client/user) and move backwards
 
 ### Materials
 
