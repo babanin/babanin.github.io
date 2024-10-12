@@ -32,6 +32,11 @@ description: 'Collection of courses, videos, books related to system design inte
 
 ## Videos
 
+**Jordan has no life**
+* [System Design](https://www.youtube.com/watch?v=ugVwhsWslAc&list=PLjTveVh7FakKjb4UYzUazqBNNF-WGurXp&pp=iAQB)
+* [System Design 2.0](https://www.youtube.com/watch?v=bwt09KXDH94&list=PLjTveVh7FakLdTmm42TMxbN8PvVn5g4KJ&pp=iAQB)
+* [System Design Questions](https://www.youtube.com/watch?v=f5Z7sbkwEwc&list=PLjTveVh7FakKmEXGgI6X-f3aRMWJM-mEm&pp=iAQB)
+
 **ByteByteGo**
 * [Design A Location Based Service (Yelp, Google Places)](https://www.youtube.com/watch?v=M4lR_Va97cQ)
 
