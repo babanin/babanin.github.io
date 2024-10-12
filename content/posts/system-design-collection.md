@@ -26,6 +26,10 @@ description: 'Collection of courses, videos, books related to system design inte
 * [Software Architecture for Busy Developers: Talk and Act Like a Software Architect in One Weekend](https://www.amazon.com/Software-Architecture-Busy-Developers-architect/dp/1801071594) - by Stephane Eyskens
 * [Kubernetes Patterns: Reusable elements for designing cloud-native applications](https://www.redhat.com/en/engage/kubernetes-containers-architecture-s-201910240918) **free** book by Bilgin Ibryam and Roland Huß
 
+## Blogs
+* [Jepsen](https://jepsen.io/blog) - about distributed systems and safety research
+* [MyDistributed.Systems](https://www.mydistributed.systems/) - Notes on distributed systems, databases, and backend development
+
 ## Videos
 
 **ByteByteGo**
