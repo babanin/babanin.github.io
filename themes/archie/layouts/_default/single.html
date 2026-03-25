@@ -1,19 +1,12 @@
 {{ define "main" }}
 <main>
 	<article>
-		<div class="title post-header">
+		<div class="post-header">
 			<h1 class="title">{{ .Title }}</h1>
 
 			{{- $pubdate := .PublishDate.Format "Jan 2, 2006" }}
 			
-			<time class="meta">&nbsp;/ pub {{ $pubdate }}{{ if .Draft }} <span class="draft-label">DRAFT</span> {{ end }}</time>
-			
-			{{- if .Lastmod }}
-				{{- $lastmod := .Lastmod.Format "Jan 2, 2006" }}
-				{{- if ne $lastmod $pubdate }}
-					<time class="meta"> / upd {{ $lastmod }} </time>
-				{{- end }}
-			{{- end }}
+			<time class="meta">Published on {{ $pubdate }}{{ if .Draft }} <span class="draft-label">DRAFT</span> {{ end }}</time>
 		</div>
 		
 		<div class="post-tags">

@@ -2,7 +2,6 @@
 title: "How a Single React Query Setting Took Down Our System"
 date: 2025-08-27
 tags: ["kubernetes", "incident", "cloudflare", "nginx", "architecture"]
-draft: true
 ---
 
 On June 26th, 2025, all of our products went down.

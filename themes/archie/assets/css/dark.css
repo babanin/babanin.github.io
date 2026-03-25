@@ -3,32 +3,27 @@ body {
   background-color: #202124;
 }
 
-::-moz-selection {
-  background: blue;
-  color: #fff;
-  text-shadow: none;
-}
-
-::selection {
-  background: red;
-  color: #fff;
-  text-shadow: none;
-}
-
 hr {
   border-top: 3px dotted blue;
 }
 code {
   background-color: lightblue;
   color: black;
-  text-decoration: bold;
+  font-weight: bold;
   padding: 0.1em 0.2em;
+  font-size: 0.85em;
 }
 pre {
   background-color: #272822;
   line-height: 1.4;
   overflow-x: auto;
   padding: 1em;
+}
+pre code {
+  background-color: transparent;
+  color: inherit;
+  font-size: 0.9em;
+  padding: 0;
 }
 blockquote {
   border-color: blue;
@@ -101,6 +96,14 @@ a:hover {
   border-color: #333;
 }
 
+.post {
+  border-color: #333;
+}
+
+.post .meta {
+  color: #888;
+}
+
 .highlight {
   background-color: #333;
 }
@@ -111,11 +114,17 @@ a:hover {
   color: var(--darkMaincolor);
   background-color: blue;
 }
-.highlight pre code[class=language-javaScript]::before,
-.highlight pre code[class="language-js"]::before {
+.highlight pre code[class*="language-javaScript"]::before,
+.highlight pre code[class*="language-js"]::before {
   content: "js";
   background: #f7df1e;
   color: black;
+}
+.highlight pre code[class*="language-typescript"]::before,
+.highlight pre code[class*="language-ts"]::before {
+  content: "ts";
+  background: #3178c6;
+  color: white;
 }
 .highlight pre code[class*='language-yml']::before,
 .highlight pre code[class*='language-yaml']::before {
