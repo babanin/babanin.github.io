@@ -98,7 +98,33 @@ unavailable, they fall back to the database for all operations. So users did not
 timeout meant extra database queries, higher latency, and more load on PostgreSQL. At scale, this fallback quietly
 turned a Redis problem into a database pressure problem.
 
-HAProxy logs across multiple Redis namespaces showed:
+## The Red Herring: Blaming the Java Client
+
+Our first idea was that the problem was in the application. The `RedisCommandTimeoutException` came from **Lettuce**,
+the Redis client in our Spring Boot service. The obvious guess: our connection pool was misconfigured.
+
+One reason we started here: **we had almost no visibility into HAProxy.** At that point, we were not collecting HAProxy
+logs in a structured way. The HAProxy pods were running, but their logs were not being shipped to our logging system. We
+could only see the application-side errors - `RedisCommandTimeoutException` in Sentry - and those pointed at Lettuce.
+Without HAProxy logs, we had no way to see the "no server available" warnings or the DOWN/UP events. As far as we could
+tell, the problem was between the application and Redis, not in the proxy layer between them.
+
+So we tuned Lettuce - checked pool size, timeout settings, thread dumps, connection leaks. Nothing was clearly wrong.
+
+Then we noticed: all traffic was going to the **single Redis master**. The two replicas were idle. We turned on the *
+*HAProxy read port** to move read traffic to replicas.
+
+This should have reduced the load a lot. But the errors kept coming.
+
+A Redis instance handling only writes, with plenty of spare CPU and memory, should not time out for 2 seconds. **The
+problem was not about Redis being overloaded.** That is when we stopped looking at the application and started looking
+at the infrastructure. One of the first things we did was set up proper log collection from HAProxy - and that changed
+everything.
+
+## The Discovery: HAProxy Speaks
+
+Once we started collecting logs, we finally saw what was happening. HAProxy logs across multiple Redis namespaces
+showed:
 
 ```
 [WARNING] bk_redis_master has no server available!
@@ -126,30 +152,8 @@ Over 7 days, we counted **518 DOWN events** across five of six clusters:
 | Redis cluster D | 5           |
 | Redis cluster E | 3           |
 
-Cluster A alone had 76% of all failures.
-
-## The Red Herring: Blaming the Java Client
-
-Our first idea was that the problem was in the application. The `RedisCommandTimeoutException` came from **Lettuce**,
-the Redis client in our Spring Boot service. The obvious guess: our connection pool was misconfigured.
-
-One reason we started here: **we had almost no visibility into HAProxy.** At that point, we were not collecting HAProxy
-logs in a structured way. The HAProxy pods were running, but their logs were not being shipped to our logging system. We
-could only see the application-side errors - `RedisCommandTimeoutException` in Sentry - and those pointed at Lettuce.
-Without HAProxy logs, we had no way to see the "no server available" warnings or the DOWN/UP events. As far as we could
-tell, the problem was between the application and Redis, not in the proxy layer between them.
-
-So we tuned Lettuce - checked pool size, timeout settings, thread dumps, connection leaks. Nothing was clearly wrong.
-
-Then we noticed: all traffic was going to the **single Redis master**. The two replicas were idle. We turned on the *
-*HAProxy read port** to move read traffic to replicas.
-
-This should have reduced the load a lot. But the errors kept coming.
-
-A Redis instance handling only writes, with plenty of spare CPU and memory, should not time out for 2 seconds. **The
-problem was not about Redis being overloaded.** That is when we stopped looking at the application and started looking
-at the infrastructure. One of the first things we did was set up proper log collection from HAProxy - and that changed
-everything.
+Cluster A alone had 76% of all failures. This confirmed the problem was not inside the application—it was in the
+connectivity layer.
 
 ## The Investigation
 

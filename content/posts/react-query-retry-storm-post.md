@@ -2,6 +2,7 @@
 title: "How a Single React Query Setting Took Down Our System"
 date: 2025-08-27
 tags: ["kubernetes", "incident", "cloudflare", "nginx", "architecture"]
+description: "How a default React Query setting triggered a synchronized retry storm that overwhelmed our infrastructure during a backend outage."
 ---
 
 On June 26th, 2025, all of our products went down.
@@ -11,8 +12,6 @@ Not partially degraded. Not slow.
 **Completely unavailable.**
 
 Users saw this:
-
-> **SSL handshake failed (Error 525)**
 
 ![SSL handshake failed Error code 525 — the Cloudflare error page users saw during the incident](/react-query-retry-storm/ssl-handshake-error.png)
 
