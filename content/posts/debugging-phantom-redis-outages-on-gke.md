@@ -1,6 +1,6 @@
 ---
 title: "Debugging Phantom Redis Outages on GKE"
-date: 2026-03-22T10:00:00+05:00
+date: 2026-03-23T10:00:00+05:00
 tags: [ redis, kubernetes, gke, haproxy, debugging, infrastructure, devops ]
 description: 'How we traced 518 Redis failures in 7 days to shared-core VMs and HAProxy defaults - and what fixed it (and what didn''t).'
 ---
@@ -28,8 +28,7 @@ it.
 ## Our Setup
 
 We run a logistics SaaS platform. Redis powers our session caching, tracking, risk scoring, and more. We have six
-separate Redis HA clusters on Google Kubernetes Engine, using the *
-*[DandyDeveloper redis-ha](https://github.com/DandyDeveloper/charts/tree/master/charts/redis-ha)** Helm chart (v4.35.x).
+separate Redis HA clusters on Google Kubernetes Engine, using the *[DandyDeveloper redis-ha](https://github.com/DandyDeveloper/charts/tree/master/charts/redis-ha)* Helm chart (v4.35.x).
 
 Each cluster has this architecture:
 

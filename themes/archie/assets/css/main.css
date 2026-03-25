@@ -159,6 +159,7 @@ h1 {
 
 h2 {
     font-size: 1.4rem;
+    margin: 0;
 }
 
 h3 {
@@ -371,7 +372,7 @@ table td {
     justify-content: space-between;
     align-items: baseline;
     flex-wrap: wrap;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.1em;
 }
 
 article .post-header h1 {
@@ -436,8 +437,8 @@ article .post-header time {
 }
 
 .description p {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+    margin-top: 0.2em;
+    margin-bottom: 0.7em;
     font-size: 0.9em;
     color: #444;
 }
