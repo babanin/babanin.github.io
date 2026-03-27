@@ -1,6 +1,6 @@
 baseURL = "https://babanin.net"
 languageCode = "en-gb"
-title = "Ivan Babanin"
+title = "Scaling Systems & Teams"
 theme = "archie"
 copyright = "© Ivan Babanin"
 publishDir = "public"

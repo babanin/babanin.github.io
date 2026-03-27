@@ -28,6 +28,8 @@ p {
     font-family: "Neuton", serif;
     font-size: 20px;
     line-height: 1.5;
+    margin-top: 0;
+    margin-bottom: 0.5em;
 }
 
 hr {
@@ -57,13 +59,17 @@ a:hover {
     text-decoration: underline;
 }
 
-ul {
+ul, ol {
     /*  list-style: none;*/
     padding-left: 3ch;
+    margin-top: 0;
+    margin-bottom: 1.2em;
 }
 
-ul li {
+ul li, ol li {
     /*  text-indent: 2ch;*/
+    font-size: 20px;
+    line-height: 1.5;
 }
 
 /* Images */
