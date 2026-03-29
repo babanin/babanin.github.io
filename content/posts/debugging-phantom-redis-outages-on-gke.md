@@ -289,7 +289,7 @@ After fixing HAProxy, we investigated why the nodes were so CPU-starved in the f
 
 ![Per-container CPU usage for a single Redis pod — Sentinel (blue) pegged at 1.0 CPU for days, then dropping to 0.1 after CPU limit applied on March 26](/debugging-phantom-redis-outages-on-gke/sentinel-cpu-per-container-white.png)
 
-![Namespace-level CPU usage across all Redis pods — multiple pods consuming ~1 CPU each from Sentinel, with CPU Quota table showing server pods exceeding their CPU limits](/debugging-phantom-redis-outages-on-gke/sentinel-cpu-namespace-white.png)
+![Namespace-level CPU usage across all Redis pods — multiple pods consuming ~1 CPU each from Sentinel, with CPU Quota table showing server pods exceeding their CPU limits](/debugging-phantom-redis-outages-on-gke/sentinel-namespace-cpu-white.png)
 
 This is a [known bug](https://github.com/argoproj/argo-cd/issues/16360) in Redis Sentinel where the event loop enters a busy spin — reading from sockets, failing, and retrying in a tight loop. It has been [reported multiple times](https://github.com/redis/redis/issues/9956) against Redis itself and against [Helm charts](https://github.com/bitnami/charts/issues/17866) that run Sentinel in Kubernetes. The process consumes 100% of its available CPU while producing no useful work.
 
