@@ -2,7 +2,7 @@
 title: "Debugging Phantom Redis Outages on GKE"
 date: 2026-03-23T10:00:00+05:00
 tags: [ redis, kubernetes, gke, haproxy, debugging, infrastructure, devops ]
-description: 'How we traced 518 Redis failures in 7 days to shared-core VMs and HAProxy defaults - and what fixed it (and what didn''t).'
+description: 'How we traced 518 Redis failures in 7 days to an aggressive HAProxy health check default - and what fixed it (and what didn''t).'
 ---
 
 518 Redis outages in 7 days. Zero CPU spikes. Zero restarts. Zero alerts from monitoring. Each incident lasted only a
@@ -18,12 +18,14 @@ it.
 ## TL;DR
 
 - Redis was not overloaded or crashing
-- GKE shared-core (E2) nodes caused ~2-second CPU freezes, invisible to standard metrics
 - HAProxy had `checkFall: 1` - one missed health check = server marked DOWN = outage
-- Two clusters had no resource requests (BestEffort QoS), making them worse
-- **Fix:** set `checkFall: 3`, add resource requests, give HAProxy its own CPU
-- Result: HAProxy outages ("no server available") dropped to zero. Individual command timeouts still happen during E2
-  CPU stalls - the real fix is migrating to dedicated-core VMs.
+- Sentinel had a [known busy-loop bug](https://github.com/argoproj/argo-cd/issues/16360) — every Sentinel container consumed a full CPU core doing nothing
+- 5 clusters x 3 replicas = 15 Sentinels consuming 15 cores on 3 nodes with only 12 cores total
+- This starved Redis and HAProxy of CPU, causing the health check timeouts
+- GKE shared-core (E2) CPU steal made it worse
+- Two clusters had no resource requests (BestEffort QoS), making them even worse
+- **Fix:** set `checkFall: 3`, add resource requests, add CPU limits on Sentinel
+- Result: HAProxy outages ("no server available") dropped to zero
 
 ## Our Setup
 
@@ -256,25 +258,15 @@ aggregated metrics to catch, but long enough to cause real errors.
 
 ## Root Cause
 
-We found two types of causes: **the trigger** (what causes the freezes) and **the amplifier** (what turns short freezes
-into user-visible errors).
+We found two types of causes: **the primary cause** (what turned short freezes into full outages) and **the contributing cause** (what triggered the freezes in the first place).
 
-### Primary cause: CPU steal on shared-core VMs
-
-Our Redis nodes use **GCP E2 instances** (`e2-standard-4`). E2 is Google Cloud's cheapest VM type. Unlike N2 or C2
-instances with dedicated CPU cores, E2 shares a physical host with other customers. The hypervisor can **take CPU time
-away** from your VM to give it to other tenants.
-
-This "CPU steal" is mostly invisible in standard monitoring setups unless you explicitly track it (via `cpu.steal`
-metrics, which most teams do not). The kernel does not see it as load, but Redis - being single-threaded - feels it
-immediately. A 2-second pause means Redis cannot respond to anything - not health checks, not client commands.
-
-### Amplifier: HAProxy checkFall: 1
+### Primary cause: HAProxy checkFall: 1
 
 A 2-second freeze should not cause a user-visible outage. But our health check configuration turned it into one.
 
-The DandyDeveloper chart defaults to `checkFall: 1` - **one failed health check immediately marks the server as DOWN**.
-Here is the timeline of what happens:
+The DandyDeveloper chart defaults to `checkFall: 1` - **one failed health check immediately marks the server as DOWN**. Once we raised `checkFall` to 3, the number of client-side errors dropped drastically. This confirmed that the aggressive health check setting was the primary cause of the outages — not the freezes themselves.
+
+Here is the timeline of what happens with `checkFall: 1`:
 
 ```
 t=0.0s  HAProxy starts health check
@@ -291,13 +283,42 @@ During the DOWN window, every application connection attempt fails. In our Java 
 With `checkFall: 3`, HAProxy would need **three failed checks in a row** before marking the server DOWN. Since our
 freezes are short, Redis recovers before the third check, and the application never sees an error.
 
-### Contributing factors
+### Contributing cause #1: Sentinel busy-loop bug consuming all node CPU
+
+After fixing HAProxy, we investigated why the nodes were so CPU-starved in the first place. We checked per-container CPU usage and found something striking: **every Sentinel container was consuming exactly 1 full CPU core** — a flat line, 24/7, with no log output.
+
+![Sentinel CPU usage graph — flat at 1.0 core for days, then dropping to ~0.1 after CPU limit applied](/debugging-phantom-redis-outages-on-gke/sentinel-cpu-white.png)
+
+This is a [known bug](https://github.com/argoproj/argo-cd/issues/16360) in Redis Sentinel where the event loop enters a busy spin — reading from sockets, failing, and retrying in a tight loop. It has been [reported multiple times](https://github.com/redis/redis/issues/9956) against Redis itself and against [Helm charts](https://github.com/bitnami/charts/issues/17866) that run Sentinel in Kubernetes. The process consumes 100% of its available CPU while producing no useful work.
+
+Here is why this matters. We had:
+
+- **5 Redis clusters** x **3 replicas each** = **15 Sentinel containers**
+- Each consuming **1 full CPU core**
+- Running on **3 nodes** of `e2-standard-4` (**4 cores each = 12 cores total**)
+
+**15 cores of Sentinel demand on 12 available cores.** Sentinel alone was oversubscribing the entire node pool — before Redis, HAProxy, exporters, or split-brain-fix even got a turn. This is why CPU load per core spiked to 80% during failure windows. This is why Redis could not respond to health checks in time. The nodes were not "mysteriously contended" — they were starved by runaway Sentinel processes.
+
+After we applied a **100m CPU limit** on all Sentinel containers, their actual CPU usage dropped to ~0.097 cores — confirming they never needed a full core. Sentinel's real workload (health checks every second, leader election) is trivial.
+
+### Contributing cause #2: E2 shared-core CPU steal
+
+On top of the Sentinel CPU drain, our Redis nodes use **GCP E2 instances** (`e2-standard-4`). [E2 is Google Cloud's cheapest VM type](https://cloud.google.com/blog/products/compute/understanding-dynamic-resource-management-in-e2-vms). It shares a physical host with other customers, and the hypervisor can take CPU time away from your VM to service other tenants.
+
+When we checked `system.cpu.stolen` metrics during failure windows, steal time was low on average — only 0.3-0.5%. But a 2-second steal event would be hidden by 60-second metric aggregation. On nodes already starved by Sentinel, even a brief CPU steal could push Redis over the edge — the difference between responding to a health check in time and missing it.
+
+![CPU Saturation (Load1 per CPU) zoomed in to the failure window — load peaks at ~80% at exactly the time of Redis errors](/debugging-phantom-redis-outages-on-gke/cpu-saturation-white.png)
+
+Redis is single-threaded and very sensitive to delays. A 2-second pause — from any source — means Redis cannot respond to anything: not health checks, not client commands.
+
+### Other contributing factors
 
 - **RDB fork() freezes**: The chart default `save "900 1"` triggers periodic `fork()` calls. The fork causes a short
   freeze depending on memory size.
 - **Transparent Huge Pages (THP)**: Linux's THP can cause sudden delays when the kernel reorganizes memory.
   Redis [recommends disabling THP](https://redis.io/docs/getting-started/faq/) in production.
 - **Too many pods on too few nodes**: 100+ containers on 3 shared-core nodes makes resource problems much more likely.
+- **Memory pressure**: Major page faults appeared during failure windows. The kernel was evicting memory pages and reading them back from disk — causing I/O stalls that block all processes.
 
 ### Why some clusters were hit harder: BestEffort QoS
 
@@ -318,7 +339,7 @@ Our affected clusters returned `BestEffort`. After adding resource requests, the
 
 ## The Fix
 
-Three changes, one GitOps PR:
+Four changes, deployed through GitOps:
 
 ### 1. Add resource requests to BestEffort clusters
 
@@ -393,6 +414,23 @@ failures in a row.
 The tradeoff: if a Redis master truly crashes, detection takes ~6 seconds instead of ~2. This is fine - Sentinel
 failover itself takes several seconds, so the extra delay is small.
 
+### 4. Add CPU limits on Sentinel
+
+```yaml
+sentinel:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+```
+
+This is the one place where we **do** set a CPU limit. Sentinel has a [known busy-loop bug](https://github.com/argoproj/argo-cd/issues/16360) where it can spin at 100% CPU doing nothing useful. Without a limit, each stuck Sentinel consumes a full core. With 15 Sentinel containers across the pool, this alone oversubscribed our 12-core node pool.
+
+The 100m limit caps the damage — a stuck Sentinel wastes at most 0.1 cores instead of 1.0. After deploying, actual Sentinel CPU usage was ~0.01 cores. The limit is a safety net for the bug, not a constraint on real work.
+
 ## Results
 
 The effect on HAProxy was immediate:
@@ -429,19 +467,35 @@ Both services have correct fallback behavior - they fall back to the database wh
 direct errors. But each timeout adds database load and latency.
 
 The reason: `checkFall: 3` fixed the **amplifier** (HAProxy marking the server DOWN and rejecting all new connections),
-but it did not fix the **trigger** (E2 CPU steal causing ~2-second Redis freezes). Commands that are already in-flight
-when Redis freezes will still time out - they are already waiting for a response that will not come until the freeze
-ends.
+but it did not fix the **trigger** (node-level resource contention causing freezes). Commands that are already in-flight
+when a freeze happens will still time out.
 
 Think of it this way:
 
-- **Before the fix:** A CPU freeze caused HAProxy to mark Redis as DOWN, which broke *all* connections for several
+- **Before the fix:** A freeze caused HAProxy to mark Redis as DOWN, which broke *all* connections for several
   seconds - a full outage
-- **After the fix:** A CPU freeze only affects commands that happen to be in-flight during the freeze - isolated
+- **After the fix:** A freeze only affects commands that happen to be in-flight during the freeze - isolated
   timeouts, not a full outage
 
-This is a big improvement. But it confirms that the E2 → N2 migration is the real long-term fix. The three YAML changes
-eliminated the worst symptom. The root cause still needs infrastructure changes.
+### The freeze can happen on either side
+
+We initially assumed the freezes only happened on the Redis nodes. But when we checked which pods were affected during a timeout burst, only one application pod on one node was failing — while other pods connecting to the same Redis cluster from different nodes were fine. This meant the **application node** had frozen, not the Redis node.
+
+The Redis dashboard during that exact window confirmed it — Redis was completely healthy:
+
+![Redis Grafana dashboard during the app-side timeout burst — commands/sec steady, hit rate at 95%, memory flat, no anomalies](/debugging-phantom-redis-outages-on-gke/redis-dashboard-healthy-white.png)
+
+Commands per second steady at 400-600, hit rate at 95%, memory flat, connected clients stable. Redis kept processing commands normally. The timeouts were happening because the app node could not send or receive them.
+
+We checked the app node's metrics and found the same pattern: CPU load spiked to 80% per CPU and major page faults appeared at the exact moment of the errors — while averaged CPU utilisation looked normal at ~40%.
+
+![App node CPU Saturation (Load1 per CPU) spiking to 80% during Redis timeout burst — while average CPU utilisation showed ~40%](/debugging-phantom-redis-outages-on-gke/app-node-cpu-saturation-white.png)
+
+![App node system.cpu.stolen metric — low average but a spike visible near the failure window](/debugging-phantom-redis-outages-on-gke/app-node-cpu-stolen-white.png)
+
+Both the Redis pool (3 nodes, `e2-standard-4`) and the application pool also run on E2 shared-core instances. The contention problem exists on both sides of the connection. Fixing only the Redis nodes would not eliminate all timeouts.
+
+This is a big improvement. But the four config changes only eliminated the worst symptoms. E2 shared-core CPU steal still causes occasional freezes on both pools — and that needs infrastructure changes.
 
 ## Lessons Learned
 
@@ -458,21 +512,27 @@ better default for most production systems.
 **3. BestEffort QoS is dangerous for stateful services.** Always set resource requests on Redis, databases, and other
 latency-sensitive workloads. The scheduler needs this information.
 
-**4. Shared-core VMs are risky for latency-sensitive work.** CPU steal from the hypervisor is invisible to normal
-monitoring but causes real application errors.
+**4. Shared-core VMs are risky for latency-sensitive work.** The combination of hypervisor CPU steal, CPU saturation from overcommitted pods, and memory pressure from page faults creates freezes that are invisible in averaged metrics but cause real application errors.
 
 **5. Look for correlation before cause.** Independent clusters failing at the same time on the same node was the key
 clue. It moved us from "what is wrong with Redis?" to "what is wrong with this node?"
 
-**6. Always review Helm chart defaults.** Community charts are great, but defaults like `checkFall: 1` are tuned for
+**6. Check per-container CPU usage, not just per-node.** Node-level CPU metrics looked normal because the load was spread across the metric window. Only when we looked at per-container graphs did we see Sentinel containers pegged at exactly 1.0 CPU each — a flat line that is invisible in node-level averages.
+
+**7. Always review Helm chart defaults.** Community charts are great, but defaults like `checkFall: 1` are tuned for
 safety, not for production resilience. Always check and adjust them.
+
+**8. Set CPU limits on sidecar containers.** We avoided CPU limits on Redis itself (to prevent CFS throttling), but Sentinel's busy-loop bug showed why sidecars need them. A stuck sidecar with no CPU limit can starve the main container it is supposed to support.
 
 ## Future Improvements
 
 ### Move from E2 to N2 instances
 
-N2 instances give you dedicated CPU cores. No more CPU steal. The cost increase is ~15-20%, but the predictability is
-worth it for production Redis.
+N2 instances give you dedicated CPU cores, which removes the hypervisor CPU steal component. This would not fix all freezes — CPU saturation and memory pressure can still happen on overcommitted nodes — but it removes one variable. The cost increase is ~15-20%.
+
+### Reduce pod density
+
+Our Redis pool packs 100+ containers onto 3 nodes. Our app pool runs 30+ containers per node at 40% average CPU. Both pools are overcommitted. Adding nodes to both pools, or using larger instance types, would reduce the probability of saturation spikes that cause freezes.
 
 ### Disable Transparent Huge Pages
 
@@ -523,10 +583,13 @@ HAProxy health checks.
 
 ## Conclusion
 
-What started as mysterious timeout errors turned out to be three things combined: shared-core VMs that sometimes freeze,
-an aggressive health check default, and missing resource requests. Three YAML changes eliminated the full outages -
-HAProxy no longer marks Redis as DOWN during brief CPU freezes. But individual command timeouts still happen when
-commands are in-flight during a freeze. The root cause - E2 CPU steal - needs an infrastructure fix.
+What started as mysterious timeout errors turned out to be three things layered on top of each other. The primary
+cause was `checkFall: 1` — a single missed health check immediately marked Redis as DOWN, turning brief freezes
+into full outages. The biggest contributing cause was a Sentinel busy-loop bug — 15 stuck Sentinel processes
+consuming 15 CPU cores on a 12-core node pool, starving Redis and HAProxy of the CPU they needed. And E2
+shared-core CPU steal made it worse by periodically taking away even more CPU time. Four config changes
+eliminated the outages: raising `checkFall` to 3, adding resource requests, adding CPU limits on Sentinel, and
+giving HAProxy its own CPU reservation.
 
 The bigger lesson: in distributed systems on shared infrastructure, fixes often come in layers. The first fix removes
 the worst symptom. The next fix addresses the root cause. And if your graphs are flat but your system is failing, you
